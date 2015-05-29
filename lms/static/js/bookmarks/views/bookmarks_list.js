@@ -1,7 +1,7 @@
 ;(function (define, undefined) {
     'use strict';
-    define(['gettext', 'jquery', 'underscore', 'backbone', 'moment'],
-        function (gettext, $, _, Backbone, _moment) {
+    define(['gettext', 'jquery', 'underscore', 'backbone', 'logger', 'moment'],
+        function (gettext, $, _, Backbone, Logger, _moment) {
 
         var moment = _moment || window.moment;
 
@@ -62,7 +62,18 @@
             },
 
             visitBookmark: function (event) {
-                window.location = event.target.pathname;
+                var bookmark_id = $(event.currentTarget).data('bookmarkId');
+                var component_usage_id = $(event.currentTarget).data('usageId');
+                Logger.log(
+                    'edx.course.bookmark.accessed',
+                    {
+                       bookmark_id: bookmark_id,
+                       component_type: 'vertical',
+                       component_usage_id: component_usage_id
+                    }
+                ).always(function () {
+                    window.location.href = event.currentTarget.pathname;
+                });
             },
 
             /**

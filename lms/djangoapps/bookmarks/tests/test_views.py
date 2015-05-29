@@ -5,9 +5,11 @@ Tests for bookmark views.
 import ddt
 import json
 from django.core.urlresolvers import reverse
+from mock import patch
 from rest_framework.test import APIClient
 
 from student.tests.factories import UserFactory
+
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
 
@@ -142,12 +144,20 @@ class BookmarksListViewTests(BookmarksViewTestsMixin):
     GET /api/bookmarks/v1/bookmarks/?course_id={course_id1}
     POST /api/bookmarks/v1/bookmarks
     """
+    def assert_bookmark_listed_event_emitted(self, mock_tracker, **kwargs):
+        """ Assert that edx.course.bookmark.listed event is emitted with correct data. """
+        mock_tracker.assert_any_call(
+            'edx.course.bookmark.listed',
+            kwargs
+        )
+
     @ddt.data(
         ('course_id={}', False),
         ('course_id={}&fields=path,display_name', True),
     )
     @ddt.unpack
-    def test_get_bookmarks_successfully(self, query_params, check_optionals):
+    @patch('lms.djangoapps.bookmarks.views.tracker.emit')
+    def test_get_bookmarks_successfully(self, query_params, check_optionals, mock_tracker):
         """
         Test that requesting bookmarks for a course returns records successfully in
         expected order without optional fields.
@@ -168,7 +178,10 @@ class BookmarksListViewTests(BookmarksViewTestsMixin):
         self.assert_valid_bookmark_response(bookmarks[0], self.bookmark_2, optional_fields=check_optionals)
         self.assert_valid_bookmark_response(bookmarks[1], self.bookmark_1, optional_fields=check_optionals)
 
-    def test_get_bookmarks_with_pagination(self):
+        self.assert_bookmark_listed_event_emitted(mock_tracker, bookmarks_count=2, page_size=10, page_number=1)
+
+    @patch('lms.djangoapps.bookmarks.views.tracker.emit')
+    def test_get_bookmarks_with_pagination(self, mock_tracker):
         """
         Test that requesting bookmarks for a course return results with pagination 200 code.
         """
@@ -185,7 +198,10 @@ class BookmarksListViewTests(BookmarksViewTestsMixin):
         self.assertEqual(len(bookmarks), 1)
         self.assert_valid_bookmark_response(bookmarks[0], self.bookmark_2)
 
-    def test_get_bookmarks_with_invalid_data(self):
+        self.assert_bookmark_listed_event_emitted(mock_tracker, bookmarks_count=2, page_size=1, page_number=1)
+
+    @patch('lms.djangoapps.bookmarks.views.tracker.emit')
+    def test_get_bookmarks_with_invalid_data(self, mock_tracker):
         """
         Test that requesting bookmarks with invalid data returns 0 records.
         """
@@ -194,7 +210,10 @@ class BookmarksListViewTests(BookmarksViewTestsMixin):
         bookmarks = response.data['results']
         self.assertEqual(len(bookmarks), 0)
 
-    def test_get_all_bookmarks_when_course_id_not_given(self):
+        self.assert_bookmark_listed_event_emitted(mock_tracker, bookmarks_count=0, page_size=10, page_number=1)
+
+    @patch('lms.djangoapps.bookmarks.views.tracker.emit')
+    def test_get_all_bookmarks_when_course_id_not_given(self, mock_tracker):
         """
         Test that requesting bookmarks returns all records for that user.
         """
@@ -205,6 +224,8 @@ class BookmarksListViewTests(BookmarksViewTestsMixin):
         self.assert_valid_bookmark_response(bookmarks[0], self.other_bookmark)
         self.assert_valid_bookmark_response(bookmarks[1], self.bookmark_2)
         self.assert_valid_bookmark_response(bookmarks[2], self.bookmark_1)
+
+        self.assert_bookmark_listed_event_emitted(mock_tracker, bookmarks_count=3, page_size=10, page_number=1)
 
     def test_anonymous_access(self):
         """
@@ -305,6 +326,25 @@ class BookmarksListViewTests(BookmarksViewTestsMixin):
         self.client.login(username=self.user.username, password=self.test_password)
         self.assertEqual(405, self.client.put(reverse('bookmarks')).status_code)
         self.assertEqual(405, self.client.delete(reverse('bookmarks')).status_code)
+
+    @ddt.data(
+        (-1, (2, 10, 1)),
+        (0, (2, 10, 1)),
+        (999, (2, 500, 1)),
+    )
+    @ddt.unpack
+    @patch('lms.djangoapps.bookmarks.views.tracker.emit')
+    def test_listed_event_for_different_page_size_values(self, page_size, expected_values, mock_tracker):
+        """ Test that edx.course.bookmark.listed event values are as expected for different page size values """
+        query_parameters = 'course_id={}&page_size={}'.format(self.course_id, page_size)
+        self.send_get(client=self.client, url=reverse('bookmarks'), query_parameters=query_parameters)
+
+        self.assert_bookmark_listed_event_emitted(
+            mock_tracker,
+            bookmarks_count=expected_values[0],
+            page_size=expected_values[1],
+            page_number=expected_values[2]
+        )
 
 
 @ddt.ddt
