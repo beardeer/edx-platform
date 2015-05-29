@@ -2,6 +2,9 @@
 Tests for Discussion API forms
 """
 from unittest import TestCase
+from urllib import urlencode
+
+from django.http import QueryDict
 
 from opaque_keys.edx.locator import CourseLocator
 
@@ -26,6 +29,7 @@ class FormTestMixin(object):
         message
         """
         form = self.get_form(expected_valid=False)
+        print form.errors
         self.assertEqual(form.errors, {expected_field: [expected_message]})
 
     def assert_field_value(self, field, expected_value):
@@ -66,14 +70,19 @@ class ThreadListGetFormTest(FormTestMixin, PaginationTestMixin, TestCase):
 
     def setUp(self):
         super(ThreadListGetFormTest, self).setUp()
-        self.form_data = {
-            "course_id": "Foo/Bar/Baz",
-            "page": "2",
-            "page_size": "13",
-            "topic_id": "example topic_id",
-        }
+        self.form_data = QueryDict(
+            urlencode(
+                {
+                    "course_id": "Foo/Bar/Baz",
+                    "page": "2",
+                    "page_size": "13",
+                }
+            ),
+            mutable=True
+        )
 
     def test_basic(self):
+        self.form_data.setlist("topic_id", ["example topic_id", "example 2nd topic_id"])
         form = self.get_form(expected_valid=True)
         self.assertEqual(
             form.cleaned_data,
@@ -81,7 +90,7 @@ class ThreadListGetFormTest(FormTestMixin, PaginationTestMixin, TestCase):
                 "course_id": CourseLocator.from_string("Foo/Bar/Baz"),
                 "page": 2,
                 "page_size": 13,
-                "topic_id": "example topic_id",
+                "topic_id": ["example topic_id", "example 2nd topic_id"],
             }
         )
 
@@ -92,6 +101,19 @@ class ThreadListGetFormTest(FormTestMixin, PaginationTestMixin, TestCase):
     def test_invalid_course_id(self):
         self.form_data["course_id"] = "invalid course id"
         self.assert_error("course_id", "'invalid course id' is not a valid course id")
+
+    def test_empty_topic_id(self):
+        self.form_data.setlist("topic_id", ["", "not empty"])
+        form = self.get_form(expected_valid=True)
+        self.assertEqual(
+            form.cleaned_data,
+            {
+                "course_id": CourseLocator.from_string("Foo/Bar/Baz"),
+                "page": 2,
+                "page_size": 13,
+                "topic_id": ["", "not empty"],
+            }
+        )
 
 
 class CommentListGetFormTest(FormTestMixin, PaginationTestMixin, TestCase):
