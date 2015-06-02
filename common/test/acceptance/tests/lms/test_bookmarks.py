@@ -319,7 +319,7 @@ class BookmarksTest(BookmarksTestMixin):
                 }
             }
         ]
-        self.bookmark_single_unit(0)
-        self.bookmarks.click_bookmarks_button()
-        self.bookmarks.click_bookmarked_unit(0)
+        self._bookmark_unit(0)
+        self.bookmarks_page.click_bookmarks_button()
+        self.bookmarks_page.click_bookmarked_unit(0)
         self.verify_event_data('edx.course.bookmark.accessed', event_data)
