@@ -79,6 +79,11 @@ def get_course_topics(request, course_key):
     modules_by_category = defaultdict(list)
     for module in discussion_modules:
         modules_by_category[module.discussion_category].append(module)
+
+    def get_sorted_modules(category):
+        """Returns key sorted modules by category"""
+        return sorted(modules_by_category[category], key=get_module_sort_key)
+
     courseware_topics = [
         {
             "id": None,
@@ -86,7 +91,7 @@ def get_course_topics(request, course_key):
             "thread_list_url": get_thread_list_url(
                 request,
                 course_key,
-                [item.discussion_id for item in sorted(modules_by_category[category], key=get_module_sort_key)]
+                [item.discussion_id for item in get_sorted_modules(category)]
             ),
             "children": [
                 {
@@ -95,7 +100,7 @@ def get_course_topics(request, course_key):
                     "thread_list_url": get_thread_list_url(request, course_key, [module.discussion_id]),
                     "children": [],
                 }
-                for module in sorted(modules_by_category[category], key=get_module_sort_key)
+                for module in get_sorted_modules(category)
             ],
         }
         for category in sorted(modules_by_category.keys())
@@ -130,7 +135,7 @@ def get_thread_list(request, course_key, page, page_size, topic_id_list=None):
     course_key: The key of the course to get discussion threads for
     page: The page number (1-indexed) to retrieve
     page_size: The number of threads to retrieve per page
-    topic_ids: The list of ids of the topics to get the discussion threads for
+    topic_id_list: The list of topic_ids to get the discussion threads for
 
     Returns:
 

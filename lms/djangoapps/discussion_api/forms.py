@@ -22,10 +22,6 @@ class TopicIdField(Field):
     """
     widget = MultipleHiddenInput
 
-    def __init__(self, *args, **kwargs):
-        self.field_type = CharField()
-        super(TopicIdField, self).__init__(*args, **kwargs)
-
 
 class _PaginationForm(Form):
     """A form that includes pagination fields"""
