@@ -104,9 +104,9 @@ class GetCourseTopicsTest(UrlResetMixin, ModuleStoreTestCase):
         """
         Returns the URL for the thread_list_url field, given a list of topic_ids
         """
-        path = reverse("thread-list")
+        path = "http://testserver/api/discussion/v1/threads/"
         query_list = [("course_id", unicode(self.course.id))] + [("topic_id", topic_id) for topic_id in topic_id_list]
-        return self.request.build_absolute_uri(urlunparse(("", "", path, "", urlencode(query_list), "")))
+        return urlunparse(("", "", path, "", urlencode(query_list), ""))
 
     def get_course_topics(self):
         """
@@ -117,7 +117,8 @@ class GetCourseTopicsTest(UrlResetMixin, ModuleStoreTestCase):
 
     def make_expected_tree(self, topic_id, name, children=None):
         """
-        Build an expected result tree given a topic id, display name, children
+        Build an expected result tree given a topic id, display name, and
+        children
         """
         topic_id_list = [topic_id] if topic_id else [child["id"] for child in children]
         children = children or []
@@ -164,7 +165,7 @@ class GetCourseTopicsTest(UrlResetMixin, ModuleStoreTestCase):
         expected = {
             "courseware_topics": [
                 self.make_expected_tree(
-                    "courseware-topic-id",
+                    None,
                     "Foo",
                     [self.make_expected_tree("courseware-topic-id", "Bar")]
                 ),

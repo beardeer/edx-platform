@@ -29,7 +29,6 @@ class FormTestMixin(object):
         message
         """
         form = self.get_form(expected_valid=False)
-        print form.errors
         self.assertEqual(form.errors, {expected_field: [expected_message]})
 
     def assert_field_value(self, field, expected_value):
