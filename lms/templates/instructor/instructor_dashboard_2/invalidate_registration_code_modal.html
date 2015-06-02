@@ -1,7 +1,7 @@
 <%! from django.utils.translation import ugettext as _ %>
 <%! from django.core.urlresolvers import reverse %>
 <%page args="section_data"/>
-<section id="invalidate_registration_code_modal" class="modal" role="dialog" tabindex="-1" aria-label="${_('Registration Code Status')}">
+<section id="invalidate_registration_code_modal" class="modal" role="dialog" tabindex="-1" aria-label="${_('Enrollment Code Status')}">
   <div class="inner-wrapper">
     <button class="close-modal">
       <i class="icon fa fa-remove"></i>
@@ -13,12 +13,12 @@
 
     <div id="regcode-content">
       <header>
-        <h2>${_("Registration Code Status")}</h2>
+        <h2>${_("Enrollment Code Status")}</h2>
       </header>
 
       <div class="instructions">
         <p>
-          ${_("Update Registration Code Information")}</p>
+          ${_("Update Enrollment Code Information")}</p>
       </div>
       <form id="set_regcode_status_form">
         <div id="regcode_status_form_error" class="modal-form-error"></div>
@@ -28,13 +28,13 @@
 
           <ol class="list-input">
             <li class="field required text" id="set-course-mode-modal-field-price">
-              <label for="regcode_code" class="required">${_("Registration Code")}</label>
-              <input class="field" id="regcode_code" type="text" name="regcode_code" placeholder="Enter Registration Code" aria-required="true">
+              <label for="regcode_code" class="required">${_("Enrollment Code")}</label>
+              <input class="field" id="regcode_code" type="text" name="regcode_code" placeholder="Enter Enrollment Code" aria-required="true">
             </li>
           </ol>
         </fieldset>
         <div class="submit">
-          <input name="submit" type="button" id="lookup_regcode" data-endpoint="${section_data['look_up_registration_code']}" value="${_('Lookup Registration Code')}"/>
+          <input name="submit" type="button" id="lookup_regcode" data-endpoint="${section_data['look_up_registration_code']}" value="${_('Lookup Enrollment Code')}"/>
         </div>
       </form>
     </div>

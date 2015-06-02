@@ -11,7 +11,7 @@
    <h3 class="error-msgs" id="error-msg"></h3>
    <div id = "accordion">
       <div class="wrap">
-         <h2>${_('Registration Codes')}</h2>
+         <h2>${_('Enrollment Codes')}</h2>
          <div>
             %if section_data['sales_admin']:
             <span class="code_tip">
@@ -19,7 +19,7 @@
                 <a id="registration_code_generation_link" href="#reg_code_generation_modal" class="add blue-button">${_('Create Enrollment Codes')}</a>
                 <p></p>
                 <p>${_('Invalidate, Re-Validate or Un-Redeem a particular Registration code.')}</p>
-                <a id="query_registration_code_link" href="#invalidate_registration_code_modal" rel="leanModal" class="add blue-button">${_('Query Registration Code')}</a>
+                <a id="query_registration_code_link" href="#invalidate_registration_code_modal" rel="leanModal" class="add blue-button">${_('Query Enrollment Code')}</a>
             </span>
             %endif
             <p>${_('Download a .csv file of all enrollment codes for this course')}</p>

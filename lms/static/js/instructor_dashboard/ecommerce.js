@@ -69,7 +69,7 @@ var edx = edx || {};
             var lookup_registration_code = $('#set_regcode_status_form input[name="regcode_code"]').val();
             if (lookup_registration_code == '') {
                 registration_code_status_form_error.attr('style', 'display: block !important');
-                registration_code_status_form_error.text(gettext('Please enter the Registration Code.'));
+                registration_code_status_form_error.text(gettext('Please enter the Enrollment Code.'));
                 lookup_button.removeAttr('disabled');
                 return false;
             }
