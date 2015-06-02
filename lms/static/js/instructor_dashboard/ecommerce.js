@@ -154,7 +154,7 @@ var edx = edx || {};
                 }
             });
         });
-        $("section#invalidate_registration_code_modal").on('click', 'a.registration_code_action_link', function() {
+        $("section#invalidate_registration_code_modal").on('click', 'a.registration_code_action_link', function(event) {
             event.preventDefault();
             registration_code_status_form_error.attr('style', 'display: none');
             lookup_button.attr('disabled', true);
@@ -189,7 +189,7 @@ var edx = edx || {};
                     registration_code_status_form_error.attr('style', 'display: block !important');
                     registration_code_status_form_error.text(gettext(data.message));
                 }
-            })
+            });
         });
     });
 })(Backbone, $, _, gettext);
